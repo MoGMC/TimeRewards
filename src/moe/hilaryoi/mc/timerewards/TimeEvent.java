@@ -1,7 +1,6 @@
 package moe.hilaryoi.mc.timerewards;
 
 import org.bukkit.Bukkit;
-import org.bukkit.entity.Player;
 
 public class TimeEvent {
 
@@ -29,6 +28,11 @@ public class TimeEvent {
 
 		}
 
+	}
+
+	public String getKey () {
+
+		return "timerewards_" + timeMs;
 	}
 
 

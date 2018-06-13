@@ -1,5 +1,6 @@
 package moe.hilaryoi.mc.timerewards;
 
+import com.monkeygamesmc.plugin.playerdata.PlayerData;
 import com.monkeygamesmc.plugin.playerdata.PlayerDataPlugin;
 import org.bukkit.Bukkit;
 import org.bukkit.configuration.file.FileConfiguration;
@@ -39,10 +40,12 @@ public class TimeRewardsPlugin extends JavaPlugin implements Listener {
 			List<String> commands = config.getStringList (key);
 
 			// config is in mins
-			eventsList.add (new TimeEvent (Long.parseLong (key) * 6000, commands.toArray (new String[commands.size ()])));
+			eventsList.add (new TimeEvent (Integer.parseInt (key) * 60000, commands.toArray (new String[commands.size ()])));
 
 
 		}
+
+		events = eventsList.toArray (new TimeEvent[eventsList.size ()]);
 
 		getServer ().getPluginManager ().registerEvents (this, this);
 
@@ -55,6 +58,8 @@ public class TimeRewardsPlugin extends JavaPlugin implements Listener {
 
 	}
 
+	final String TIME_PLAYED_KEY = "timerewards_timeplayed";
+
 	@EventHandler
 	public void onJoin (PlayerJoinEvent e) {
 
@@ -62,9 +67,20 @@ public class TimeRewardsPlugin extends JavaPlugin implements Listener {
 
 		startSession (uuid);
 
+		PlayerData data = db.getPlayerData (uuid);
+
+		if (!data.isSet (TIME_PLAYED_KEY)) db.setData (uuid, TIME_PLAYED_KEY, "0");
+
 		for (TimeEvent event : events) {
 
-			if (event.shouldExecute (Long.parseLong (db.getPlayerData (uuid).getData (TIME_PLAYED_KEY)))) event.execute (e.getPlayer ().getName ());
+			if (data.isSet (event.getKey ())) continue;
+
+			if (event.shouldExecute (Long.parseLong (data.getData (TIME_PLAYED_KEY)))) {
+
+				event.execute (e.getPlayer ().getName ());
+				db.setData (uuid, event.getKey (), "true");
+
+			}
 
 		}
 
@@ -75,9 +91,7 @@ public class TimeRewardsPlugin extends JavaPlugin implements Listener {
 
 	void startSession (UUID player) { sessions.put (player, System.currentTimeMillis ()); }
 
-	final String TIME_PLAYED_KEY = "timerewards.timeplayed";
-
-	void endSession (UUID player) { db.setData (player, TIME_PLAYED_KEY, String.valueOf (System.currentTimeMillis () - sessions.get (player))); }
+	void endSession (UUID player) { db.setData (player, TIME_PLAYED_KEY, String.valueOf (Long.parseLong (db.getPlayerData (player).getData (TIME_PLAYED_KEY)) + System.currentTimeMillis () - sessions.get (player))); }
 
 
 }
