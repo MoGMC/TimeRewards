@@ -1,0 +1,3 @@
+60: # time in mins
+  - "say %s is so cool" # command 1
+  - "say %s get upgrades" #command 2
