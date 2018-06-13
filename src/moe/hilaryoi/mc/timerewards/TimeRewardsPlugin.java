@@ -91,7 +91,12 @@ public class TimeRewardsPlugin extends JavaPlugin implements Listener {
 
 	void startSession (UUID player) { sessions.put (player, System.currentTimeMillis ()); }
 
-	void endSession (UUID player) { db.setData (player, TIME_PLAYED_KEY, String.valueOf (Long.parseLong (db.getPlayerData (player).getData (TIME_PLAYED_KEY)) + System.currentTimeMillis () - sessions.get (player))); }
+	void endSession (UUID player) {
+
+		db.setData (player, TIME_PLAYED_KEY, String.valueOf (Long.parseLong (db.getPlayerData (player).getData (TIME_PLAYED_KEY)) + System.currentTimeMillis () - sessions.get (player)));
+		sessions.remove (player);
+
+	}
 
 
 }
